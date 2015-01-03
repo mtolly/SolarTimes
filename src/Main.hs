@@ -43,11 +43,15 @@ initialFuncs =
     ) -- TODO
   , ( ("INT", TSingle)
     , Function $ \[arg] ->
-      return $ VSingle $ fromInteger $ floor $ asDouble arg
+      return $ VLong $ floor $ asDouble arg
     )
   , ( ("FIX", TSingle)
     , Function $ \[arg] ->
-      return $ VSingle $ fromInteger $ truncate $ asDouble arg
+      return $ VLong $ truncate $ asDouble arg
+    )
+  , ( ("CINT", TSingle)
+    , Function $ \[arg] ->
+      return $ VLong $ round $ asDouble arg
     )
   , ( ("STR", TString)
     , Function $ \[arg] -> return $ VString $ case arg of
@@ -61,6 +65,9 @@ initialFuncs =
     )
   , ( ("ABS", TSingle)
     , Function $ \[arg] -> return $ VSingle $ realToFrac $ abs $ asDouble arg
+    )
+  , ( ("SGN", TSingle)
+    , Function $ \[arg] -> return $ VSingle $ realToFrac $ signum $ asDouble arg
     )
   ] -- TODO
 
@@ -242,7 +249,7 @@ run = do
           run
         StartIf cond -> do
           b <- asBool <$> eval cond
-          when b $ modify $ \st -> st
+          unless b $ modify $ \st -> st
             { current = dropWhile (not . (== EndIf)) $ current st
             }
           run
@@ -252,6 +259,17 @@ run = do
           modify $ \st -> st
             { current = dropWhile (not . isLabelFor (fromIntegral line)) $ program st
             , returnTo = current st
+            }
+          run
+        Goto expr -> do
+          line <- asLong <$> eval expr
+          modify $ \st -> st
+            { current = dropWhile (not . isLabelFor (fromIntegral line)) $ program st
+            }
+          run
+        Return -> do
+          modify $ \st -> st
+            { current = returnTo st
             }
           run
         _ -> error $ "run: undefined; " ++ show stmt
