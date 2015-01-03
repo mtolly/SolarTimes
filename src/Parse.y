@@ -72,18 +72,23 @@ Stmts
   | Stmt ':' Stmts { $1 : $3 }
 
 Stmt
-  : PRINT { Print "" }
-  | PRINT str { Print $2 }
+  : PRINT SemiExprs { Print $2 }
+  | LPRINT SemiExprs { LPrint $2 }
   | COLOR int ',' int { Color $2 $4 }
-  | DIM ident '(' int ')' { Dim $2 $4 }
+  | DIM Var { Dim $2 }
   | Var '=' Expr { Assign $1 $3 }
   | SAY Expr { Say $2 }
-  | INPUT Expr ';' Var { Input $2 $4 }
+  | INPUT Expr ';' Vars { Input $2 $4 }
   | CALL ident '(' Vars ')' { Call $2 $4 }
   | IF Expr THEN Stmt { If $2 $4 }
   | IF Expr THEN { StartIf $2 }
   | END IF { EndIf }
   | GOTO Expr { Goto $2 }
+  | GOSUB Expr { Gosub $2 }
+  | FOR Var '=' Expr TO Expr { For $2 $4 $6 }
+  | NEXT Var { Next $2 }
+  | READ Var { Read $2 }
+  | DATA Args { Data $2 }
 
 Expr
   : ExprOr { $1 }
@@ -105,14 +110,20 @@ ExprCmp
   | ExprAdd { $1 }
 
 ExprAdd
-  : ExprMod { $1 }
+  : ExprMod '+' ExprAdd { Add $1 $3 }
+  | ExprMod '-' ExprAdd { Subtract $1 $3 }
+  | ExprMod { $1 }
 
 ExprMod
   : ExprMult { $1 }
 
 ExprMult
-  : Expr0 '*' ExprMult { Mult $1 $3 }
-  | Expr0 '/' ExprMult { Div $1 $3 }
+  : ExprUMinus '*' ExprMult { Mult $1 $3 }
+  | ExprUMinus '/' ExprMult { Div $1 $3 }
+  | ExprUMinus { $1 }
+
+ExprUMinus
+  : '-' ExprUMinus { Subtract (Double 0) $2 }
   | Expr0 { $1 }
 
 Expr0
@@ -122,17 +133,17 @@ Expr0
   | int { Double $ fromIntegral $1 }
   | str { String $1 }
   | Var { Var $1 }
-  | Var '(' Args ')' { Func $1 $3 }
 
 Args
   : { [] }
-  | Args1 { $1 }
-
-Args1
-  : Expr { [$1] }
-  | Expr ',' Args1 { $1 : $3 }
+  | Expr { [$1] }
+  | Expr ',' Args { $1 : $3 }
 
 Var
+  : SimpleVar { SimpleVar $1 }
+  | SimpleVar '(' Args ')' { FuncArray $1 $3 }
+
+SimpleVar
   : ident { ($1, TSingle) }
   | ident '$' { ($1, TString) }
   -- | ident '!' { ($1, TSingle) }
@@ -142,11 +153,13 @@ Var
 
 Vars
   : { [] }
-  | Vars1 { $1 }
+  | Var { [$1] }
+  | Var ',' Vars { $1 : $3 }
 
-Vars1
-  : Var { [$1] }
-  | Var ',' Vars1 { $1 : $3 }
+SemiExprs
+  : { [] }
+  | Expr { [$1] }
+  | Expr ';' SemiExprs { $1 : $3 }
 
 int : intfull { fst $1 }
 dec : decfull { fst $1 }
@@ -156,22 +169,27 @@ dec : decfull { fst $1 }
 type Line = (Integer, [Stmt])
 
 data Stmt
-  = Print String
+  = Print [Expr]
+  | LPrint [Expr]
   | Color Integer Integer
-  | Dim String Integer
+  | Dim Var
   | Assign Var Expr
   | Say Expr
-  | Input Expr Var
+  | Input Expr [Var]
   | Call String [Var]
   | If Expr Stmt
   | Goto Expr
+  | Gosub Expr
   | StartIf Expr
   | EndIf
+  | For Var Expr Expr
+  | Next Var
+  | Read Var
+  | Data [Expr]
   deriving (Eq, Ord, Show, Read)
 
 data Expr
   = Double Double
-  | Func Var [Expr]
   | String String
   | Var Var
   | Compare Ordering Expr Expr
@@ -180,9 +198,16 @@ data Expr
   | Div Expr Expr
   | Or Expr Expr
   | And Expr Expr
+  | Add Expr Expr
+  | Subtract Expr Expr
   deriving (Eq, Ord, Show, Read)
 
-type Var = (String, Type)
+data Var
+  = SimpleVar SimpleVar
+  | FuncArray SimpleVar [Expr]
+  deriving (Eq, Ord, Show, Read)
+
+type SimpleVar = (String, Type)
 
 data Type
   = TSingle

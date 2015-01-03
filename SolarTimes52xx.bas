@@ -166,7 +166,7 @@
 353 IF D2=0 THEN SAY TRANSLATE$("lonjitood iz on the grenich prime meridian.")
 
 360 LPRINT "Solar Times for ";LC$; CHR$(13)
-370 IF D1>0 AND D1<89.599 THEN LPRINT"Latitude -  ";D1;Deg N
+370 IF D1>0 AND D1<89.599 THEN LPRINT"Latitude -  ";D1;"Deg N
 380 IF D1<0 AND D1>-89.599 THEN LPRINT"Latitude -  ";(ABS(D1));"Deg S
 390 IF D1=0 THEN LPRINT"Lat -   EQUATOR
 400 IF D1>89.599 THEN LPRINT"Latitude -   NORTH POLE
