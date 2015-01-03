@@ -11,6 +11,7 @@ import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
 import Data.List.Split (splitOn)
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
+import Data.Bits
 
 data Value
   = VLong Int32
@@ -37,7 +38,30 @@ data Binding
 
 initialFuncs :: [(SimpleVar, Binding)]
 initialFuncs =
-  [ (("TRANSLATE", TString), Function $ return . head) -- TODO
+  [ ( ("TRANSLATE", TString)
+    , Function $ \[arg] -> return arg
+    ) -- TODO
+  , ( ("INT", TSingle)
+    , Function $ \[arg] ->
+      return $ VSingle $ fromInteger $ floor $ asDouble arg
+    )
+  , ( ("FIX", TSingle)
+    , Function $ \[arg] ->
+      return $ VSingle $ fromInteger $ truncate $ asDouble arg
+    )
+  , ( ("STR", TString)
+    , Function $ \[arg] -> return $ VString $ case arg of
+      VString s -> s
+      VLong   i -> if i <= 0 then show i else ' ' : show i
+      VSingle f -> if f <= 0 then show f else ' ' : show f
+      VDouble d -> if d <= 0 then show d else ' ' : show d
+    )
+  , ( ("CHR", TString)
+    , Function $ \[arg] -> return $ VString [toEnum $ fromIntegral $ asLong arg]
+    )
+  , ( ("ABS", TSingle)
+    , Function $ \[arg] -> return $ VSingle $ realToFrac $ abs $ asDouble arg
+    )
   ] -- TODO
 
 getBinding :: SimpleVar -> Basic Binding
@@ -53,10 +77,16 @@ eval :: Expr -> Basic Value
 eval e = case e of
   String s -> return $ VString s
   Double d -> return $ VDouble d
-  Div x y -> do
+  Div x y -> math (/) x y
+  Mult x y -> math (*) x y
+  Add x y -> math (+) x y
+  Subtract x y -> math (-) x y
+  Or x y -> bitwise (.|.) x y
+  And x y -> bitwise (.&.) x y
+  Compare ord x y -> do
     vx <- asDouble <$> eval x
     vy <- asDouble <$> eval y
-    return $ VDouble $ vx / vy
+    return $ VLong $ if compare vx vy == ord then -1 else 0
   Var v -> case v of
     FuncArray fun args -> do
       bin <- getBinding fun
@@ -75,13 +105,31 @@ eval e = case e of
         Array    _ -> error $ "eval: tried to evaluate array "    ++ show sv
         Function _ -> error $ "eval: tried to evaluate function " ++ show sv
   _ -> error $ "eval: undefined; " ++ show e
+  where math op x y = do
+          vx <- asDouble <$> eval x
+          vy <- asDouble <$> eval y
+          return $ VDouble $ op vx vy
+        bitwise op x y = do
+          vx <- asLong <$> eval x
+          vy <- asLong <$> eval y
+          return $ VLong $ op vx vy
 
 asDouble :: Value -> Double
 asDouble v = case v of
-  VLong i -> fromIntegral i
+  VLong   i -> fromIntegral i
   VSingle f -> realToFrac f
   VDouble d -> d
-  VString _ -> error "asDouble: got string value"
+  VString s -> read s
+
+asLong :: Value -> Int32
+asLong v = case v of
+  VLong   i -> i
+  VSingle f -> round f
+  VDouble d -> round d
+  VString s -> read s
+
+asBool :: Value -> Bool
+asBool = (/= 0) . asDouble
 
 asString :: Value -> String
 asString v = case v of
@@ -112,6 +160,10 @@ castTo TDouble v = VDouble $ case v of
   VLong   x -> fromIntegral x
   VString x -> read x
 
+isSubStart :: String -> Stmt -> Bool
+isSubStart s (Sub s' _) = s == s'
+isSubStart _ _          = False
+
 run :: Basic ()
 run = do
   stmts <- gets current
@@ -123,6 +175,12 @@ run = do
         Label _ -> run
         Print xs -> do
           forM_ xs $ \x -> eval x >>= liftIO . putStr . asString
+          liftIO $ putChar '\n'
+          run
+        LPrint xs -> do
+          liftIO $ putStr "[[ "
+          forM_ xs $ \x -> eval x >>= liftIO . putStr . asString
+          liftIO $ putStr " ]]"
           liftIO $ putChar '\n'
           run
         Color _ _ -> run -- TODO
@@ -155,7 +213,56 @@ run = do
           forM_ (zip vars $ splitOn "," input) $ \(var, str) ->
             assign var $ VString str
           run
+        Call s svs -> do
+          subStart <- dropWhile (not . isSubStart s) <$> gets program
+          case subStart of
+            Sub _ formals : theSub -> do
+              modify $ \st -> st
+                { current = theSub
+                , returnTo = current st
+                , subBindings = zip formals svs
+                }
+              run
+            _ -> error $ "run: couldn't find subprogram " ++ s
+        EndSub -> do
+          modify $ \st -> st
+            { current = returnTo st
+            , subBindings = []
+            }
+          run
+        If cond body -> do
+          b <- asBool <$> eval cond
+          modify $ \st -> if b
+            then st
+              { current = body : current st
+              }
+            else st
+              { current = dropWhile (not . isLabel) $ current st
+              }
+          run
+        StartIf cond -> do
+          b <- asBool <$> eval cond
+          when b $ modify $ \st -> st
+            { current = dropWhile (not . (== EndIf)) $ current st
+            }
+          run
+        EndIf -> run
+        Gosub expr -> do
+          line <- asLong <$> eval expr
+          modify $ \st -> st
+            { current = dropWhile (not . isLabelFor (fromIntegral line)) $ program st
+            , returnTo = current st
+            }
+          run
         _ -> error $ "run: undefined; " ++ show stmt
+
+isLabel :: Stmt -> Bool
+isLabel (Label _) = True
+isLabel _         = False
+
+isLabelFor :: Integer -> Stmt -> Bool
+isLabelFor i (Label i') = i == i'
+isLabelFor _ _          = False
 
 assign :: Var -> Value -> Basic ()
 assign (SimpleVar sv) val = do

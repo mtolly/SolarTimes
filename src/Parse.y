@@ -89,7 +89,7 @@ Stmt
   | SAY Expr { Say $2 }
   | INPUT Expr ';' Vars { Input (Just $2) $4 }
   | INPUT Vars { Input Nothing $2 }
-  | CALL ident '(' Vars ')' { Call $2 $4 }
+  | CALL ident '(' SimpleVars ')' { Call $2 $4 }
   | IF Expr THEN Stmt { If $2 $4 }
   | IF Expr THEN { StartIf $2 }
   | END IF { EndIf }
@@ -101,7 +101,7 @@ Stmt
   | DATA Args { Data $2 }
   | END { End }
   | RETURN { Return }
-  | SUB ident '(' Vars ')' STATIC { Sub $2 $4 }
+  | SUB ident '(' SimpleVars ')' STATIC { Sub $2 $4 }
   | END SUB { EndSub }
 
 Expr
@@ -168,6 +168,11 @@ Vars
   | Var { [$1] }
   | Var ',' Vars { $1 : $3 }
 
+SimpleVars
+  : { [] }
+  | SimpleVar { [$1] }
+  | SimpleVar ',' SimpleVars { $1 : $3 }
+
 SemiExprs
   : { [] }
   | Expr { [$1] }
@@ -188,7 +193,7 @@ data Stmt
   | Assign SimpleVar Expr
   | Say Expr
   | Input (Maybe Expr) [Var]
-  | Call String [Var]
+  | Call String [SimpleVar]
   | If Expr Stmt
   | Goto Expr
   | Gosub Expr
@@ -200,7 +205,7 @@ data Stmt
   | Data [Expr]
   | End
   | Return
-  | Sub String [Var]
+  | Sub String [SimpleVar]
   | EndSub
   | Label Integer
   deriving (Eq, Ord, Show, Read)

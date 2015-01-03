@@ -133,7 +133,7 @@ REM  SolarTimes 52xx.bas
 
 313 REM Say special Latitudes.
 314 IF D1=0 THEN SAY TRANSLATE$("latitood iz on the ekwaytor")
-315 IF DI>89.599 THEN SAY TRANSLATE$("latitood iz the north pole. no lonjitood has to be entered."):D2=0:GOTO 360
+315 IF D1>89.599 THEN SAY TRANSLATE$("latitood iz the north pole. no lonjitood has to be entered."):D2=0:GOTO 360
 316 IF D1<-89.599 THEN SAY TRANSLATE$("latitood iz the south pole. no lonjitood has to be entered."):D2=0:GOTO 360
 
 317 REM Get the Longitude from the user.
@@ -165,7 +165,7 @@ REM  SolarTimes 52xx.bas
 352 IF D2<-179.599# THEN SAY TRANSLATE$("lonjitood iz on the intenational date line")
 353 IF D2=0 THEN SAY TRANSLATE$("lonjitood iz on the grenich prime meridian.")
 
-360 LPRINT "Solar Times for ";LC$; CHR$(13)
+360 LPRINT "Solar Times for ";LC$; CHR$(10)
 370 IF D1>0 AND D1<89.599 THEN LPRINT"Latitude -  ";D1;"Deg N
 380 IF D1<0 AND D1>-89.599 THEN LPRINT"Latitude -  ";(ABS(D1));"Deg S
 390 IF D1=0 THEN LPRINT"Lat -   EQUATOR
