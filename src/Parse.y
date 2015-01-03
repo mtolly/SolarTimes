@@ -95,8 +95,8 @@ Stmt
   | END IF { EndIf }
   | GOTO Expr { Goto $2 }
   | GOSUB Expr { Gosub $2 }
-  | FOR Var '=' Expr TO Expr { For $2 $4 $6 }
-  | NEXT Var { Next $2 }
+  | FOR SimpleVar '=' Expr TO Expr { For $2 $4 $6 }
+  | NEXT SimpleVar { Next $2 }
   | READ Var { Read $2 }
   | DATA Args { Data $2 }
   | END { End }
@@ -199,8 +199,8 @@ data Stmt
   | Gosub Expr
   | StartIf Expr
   | EndIf
-  | For Var Expr Expr
-  | Next Var
+  | For SimpleVar Expr Expr
+  | Next SimpleVar
   | Read Var
   | Data [Expr]
   | End

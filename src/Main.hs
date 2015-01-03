@@ -26,6 +26,8 @@ data BasicState = BasicState
   , returnTo :: [Stmt]
   , bindings :: [(SimpleVar, Binding)]
   , subBindings :: [(SimpleVar, SimpleVar)]
+  , dataValues :: [Expr]
+  , loops :: [(SimpleVar, ([Value], [Stmt]))]
   } deriving (Show)
 
 type Basic = StateT BasicState IO
@@ -53,6 +55,10 @@ initialFuncs =
     , Function $ \[arg] ->
       return $ VLong $ round $ asDouble arg
     )
+  , ( ("CLNG", TSingle)
+    , Function $ \[arg] ->
+      return $ VLong $ round $ asDouble arg
+    )
   , ( ("STR", TString)
     , Function $ \[arg] -> return $ VString $ case arg of
       VString s -> s
@@ -68,6 +74,12 @@ initialFuncs =
     )
   , ( ("SGN", TSingle)
     , Function $ \[arg] -> return $ VSingle $ realToFrac $ signum $ asDouble arg
+    )
+  , ( ("COS", TSingle)
+    , Function $ \[arg] -> return $ VSingle $ realToFrac $ cos $ asDouble arg
+    )
+  , ( ("SIN", TSingle)
+    , Function $ \[arg] -> return $ VSingle $ realToFrac $ sin $ asDouble arg
     )
   ] -- TODO
 
@@ -102,7 +114,7 @@ eval e = case e of
         Array vals -> case args of
           [arg] -> do
             dbl <- asDouble <$> eval arg
-            return $ vals !! round dbl
+            return $ vals !! (round dbl - 1)
           _ -> error $ "eval: tried to access array with more than 1 index"
         Function f -> mapM eval args >>= f
     SimpleVar sv -> do
@@ -272,6 +284,43 @@ run = do
             { current = returnTo st
             }
           run
+        Read var -> do
+          exprs <- gets dataValues
+          case exprs of
+            [] -> error "run: tried to read but out of data"
+            x : xs -> do
+              eval x >>= assign var
+              modify $ \st -> st
+                { dataValues = xs
+                }
+              run
+        For sv x y -> do
+          vx <- asLong <$> eval x
+          vy <- asLong <$> eval y
+          assign (SimpleVar sv) $ VLong vx
+          modify $ \st -> st
+            { loops = (sv, (map VLong [vx + 1 .. vy], current st)) : loops st
+            }
+          run
+        Next sv -> do
+          ls <- gets loops
+          case lookup sv ls of
+            Nothing -> error $ "run: couldn't find loop variable " ++ show sv
+            Just (vals, next) -> case vals of
+              [] -> do
+                modify $ \st -> st
+                  { loops = filter ((/= sv) . fst) $ loops st
+                  }
+                run
+              v : vs -> do
+                assign (SimpleVar sv) v
+                modify $ \st -> st
+                  { current = next
+                  , loops = (sv, (vs, next)) : loops st
+                  }
+                run
+        End -> return ()
+        Data _ -> run
         _ -> error $ "run: undefined; " ++ show stmt
 
 isLabel :: Stmt -> Bool
@@ -298,13 +347,14 @@ assign (FuncArray fun args) val = do
       Array xs -> case args of
         [arg] -> do
           index <- round . asDouble <$> eval arg
-          case splitAt index xs of
+          case splitAt (index - 1) xs of
             (before, _ : after) -> let
               xs' = before ++ [val'] ++ after
               in modify $ \st -> st
                 { bindings = (fun, Array xs') : bindings st
                 }
-            (_, []) -> error "assign: tried to assign to too-large array index"
+            (_, []) -> error $
+              "assign: tried to assign to too-large array index; " ++ show (index, xs)
         _ -> error "assign: tried to assign to array using more than 1 index"
       _ -> undefined
 
@@ -318,5 +368,7 @@ main = do
         , returnTo = error "Tried to return, but not in a subprogram"
         , bindings = initialFuncs
         , subBindings = []
+        , dataValues = [ expr | Data exprs <- stmts, expr <- exprs ]
+        , loops = []
         }
   evalStateT run initialState
