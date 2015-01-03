@@ -64,7 +64,8 @@ import Data.List.Split
 
 %%
 
-Line : int Stmts { ($1, $2) }
+Line
+  : int Stmts { Label $1 : $2 }
 
 Stmts
   : { [] }
@@ -173,8 +174,6 @@ dec : decfull { fst $1 }
 
 {
 
-type Line = (Integer, [Stmt])
-
 data Stmt
   = Print [Expr]
   | PrintUsing Expr [Expr]
@@ -199,6 +198,7 @@ data Stmt
   | Return
   | Sub String [Var]
   | EndSub
+  | Label Integer
   deriving (Eq, Ord, Show, Read)
 
 data Expr
@@ -230,8 +230,8 @@ data Type
   | TString
   deriving (Eq, Ord, Show, Read, Enum, Bounded)
 
-parseFile :: [Token] -> [Line]
-parseFile = map parseLine . filter (not . null) . splitOn [Newline]
+parseFile :: [Token] -> [Stmt]
+parseFile = concatMap parseLine . filter (not . null) . splitOn [Newline]
 
 parseError :: [Token] -> a
 parseError _ = error "Parse error"

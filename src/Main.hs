@@ -6,4 +6,4 @@ import Parse
 main :: IO ()
 main = do
   s <- readFile "SolarTimes52xx.bas"
-  print $ parseFile $ scan s
+  mapM_ print $ parseFile $ scan s
