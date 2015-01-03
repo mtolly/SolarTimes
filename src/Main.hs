@@ -12,6 +12,7 @@ import Data.Maybe (fromMaybe)
 import Data.List.Split (splitOn)
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Data.Bits
+import Text.Printf (printf)
 
 data Value
   = VLong Int32
@@ -81,6 +82,19 @@ initialFuncs =
   , ( ("SIN", TSingle)
     , Function $ \[arg] -> return $ VSingle $ realToFrac $ sin $ asDouble arg
     )
+  , ( ("ATN", TSingle)
+    , Function $ \[arg] -> return $ VSingle $ realToFrac $ atan $ asDouble arg
+    )
+  , ( ("SQR", TSingle)
+    , Function $ \[arg] -> return $ VSingle $ realToFrac $ sqrt $ asDouble arg
+    )
+  , ( ("LEN", TSingle)
+    , Function $ \[arg] -> return $ VLong $ fromIntegral $ length $ asString arg
+    )
+  , ( ("RIGHT", TString)
+    , Function $ \[str, int] -> return $ VString $
+      reverse $ take (fromIntegral $ asLong int) $ reverse $ asString str
+    )
   ] -- TODO
 
 getBinding :: SimpleVar -> Basic Binding
@@ -106,6 +120,9 @@ eval e = case e of
     vx <- asDouble <$> eval x
     vy <- asDouble <$> eval y
     return $ VLong $ if compare vx vy == ord then -1 else 0
+  Not x -> do
+    vx <- asLong <$> eval x
+    return $ VLong $ complement vx
   Var v -> case v of
     FuncArray fun args -> do
       bin <- getBinding fun
@@ -123,7 +140,6 @@ eval e = case e of
         Value  val -> return val
         Array    _ -> error $ "eval: tried to evaluate array "    ++ show sv
         Function _ -> error $ "eval: tried to evaluate function " ++ show sv
-  _ -> error $ "eval: undefined; " ++ show e
   where math op x y = do
           vx <- asDouble <$> eval x
           vy <- asDouble <$> eval y
@@ -321,6 +337,23 @@ run = do
                 run
         End -> return ()
         Data _ -> run
+        PrintUsing format exprs -> do
+          expr <- case exprs of
+            [expr] -> return expr
+            _ -> error $ "run: PRINT USING given not exactly 1 expression"
+          s <- asString <$> eval format
+          case s of
+            "###.#" -> do
+              dbl <- asDouble <$> eval expr
+              liftIO $ printf "%5.1f" dbl
+            "####.#" -> do
+              dbl <- asDouble <$> eval expr
+              liftIO $ printf "%6.1f" dbl
+            _ -> error $ "run: unrecognized format; " ++ s
+          run
+        LPrintUsing _ _ -> do
+          liftIO $ putStrLn "[[ TODO ]]"
+          run
         _ -> error $ "run: undefined; " ++ show stmt
 
 isLabel :: Stmt -> Bool

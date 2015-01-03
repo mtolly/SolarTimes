@@ -279,9 +279,9 @@ REM  SolarTimes 52xx.bas
 940 LPRINT USING" ###.#";D;
 950 LPRINT" DEGREES"
 
-960 IF D=0 THEN SAY TRANSLATE("the declination of the sun iz zero da-grees")
-970 IF D>0 THEN SAY TRANSLATE("the declination of the sun iz"): SAY (H$):SAY TRANSLATE$("da-grees")
-980 IF D<0 THEN SAY TRANSLATE("the declination of the sun iz mynus"): SAY (H$):SAY TRANSLATE$("da-grees")
+960 IF D=0 THEN SAY TRANSLATE$("the declination of the sun iz zero da-grees")
+970 IF D>0 THEN SAY TRANSLATE$("the declination of the sun iz"): SAY (H$):SAY TRANSLATE$("da-grees")
+980 IF D<0 THEN SAY TRANSLATE$("the declination of the sun iz mynus"): SAY (H$):SAY TRANSLATE$("da-grees")
 
 989 REM Report info for Equation of Time
 990 E=.008000001#+.51*COS(PL*x)-3.197*COS(2*PL*x)-.106*COS(3*PL*x)-.15*COS(4*PL*x)-7.317001*SIN(PL*x)-9.471001*SIN(2*PL*x)-.391*SIN(3*PL*x)-.242*SIN(4*PL*x)
