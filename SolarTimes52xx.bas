@@ -422,7 +422,7 @@
 1740 SUB BREAKINPUT (MYINPUT, LEFTPART, RIGHTPART) STATIC
 1750 REM Here we will do the math after multiplying by 1000 to be sure and
 1760 REM eliminate any precision error. After we're done, divide by 1000.
-1770    BIGINPUT + INT(MYINPUT * 1000)
+1770    BIGINPUT = INT(MYINPUT * 1000)
 1780    LEFTPART = FIX(MYINPUT)
 1790    LEFTBIG = INT(LEFTPART * 1000)
 1800    RIGHTBIG = BIGINPUT - LEFTBIG

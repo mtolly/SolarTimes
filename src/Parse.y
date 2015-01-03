@@ -16,7 +16,7 @@ import Data.List.Split
   intfull { Int $$ }
   decfull { Dec $$ }
   str { Str $$ }
-  '\n' { Newline }
+  -- '\n' { Newline }
 
   ident { Ident $$ }
 
@@ -73,12 +73,15 @@ Stmts
 
 Stmt
   : PRINT SemiExprs { Print $2 }
+  | PRINT USING Expr ';' SemiExprs { PrintUsing $3 $5 }
   | LPRINT SemiExprs { LPrint $2 }
+  | LPRINT USING Expr ';' SemiExprs { LPrintUsing $3 $5 }
   | COLOR int ',' int { Color $2 $4 }
   | DIM Var { Dim $2 }
   | Var '=' Expr { Assign $1 $3 }
   | SAY Expr { Say $2 }
-  | INPUT Expr ';' Vars { Input $2 $4 }
+  | INPUT Expr ';' Vars { Input (Just $2) $4 }
+  | INPUT Vars { Input Nothing $2 }
   | CALL ident '(' Vars ')' { Call $2 $4 }
   | IF Expr THEN Stmt { If $2 $4 }
   | IF Expr THEN { StartIf $2 }
@@ -89,6 +92,10 @@ Stmt
   | NEXT Var { Next $2 }
   | READ Var { Read $2 }
   | DATA Args { Data $2 }
+  | END { End }
+  | RETURN { Return }
+  | SUB ident '(' Vars ')' STATIC { Sub $2 $4 }
+  | END SUB { EndSub }
 
 Expr
   : ExprOr { $1 }
@@ -170,12 +177,14 @@ type Line = (Integer, [Stmt])
 
 data Stmt
   = Print [Expr]
+  | PrintUsing Expr [Expr]
   | LPrint [Expr]
+  | LPrintUsing Expr [Expr]
   | Color Integer Integer
   | Dim Var
   | Assign Var Expr
   | Say Expr
-  | Input Expr [Var]
+  | Input (Maybe Expr) [Var]
   | Call String [Var]
   | If Expr Stmt
   | Goto Expr
@@ -186,6 +195,10 @@ data Stmt
   | Next Var
   | Read Var
   | Data [Expr]
+  | End
+  | Return
+  | Sub String [Var]
+  | EndSub
   deriving (Eq, Ord, Show, Read)
 
 data Expr

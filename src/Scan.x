@@ -31,7 +31,9 @@ tokens :-
 \< { const Less }
 \> { const Greater }
 \<\= { const LessEqual }
+\=\< { const LessEqual }
 \>\= { const GreaterEqual }
+\=\> { const GreaterEqual }
 \( { const LParen }
 \) { const RParen }
 \$ { const Dollar }

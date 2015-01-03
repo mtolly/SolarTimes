@@ -6,4 +6,4 @@ import Parse
 main :: IO ()
 main = do
   s <- readFile "SolarTimes52xx.bas"
-  print $ scan s
+  print $ parseFile $ scan s
