@@ -10,8 +10,10 @@ executable amiga-basic
   main-is: Main.hs
   other-modules:
     Scan
+    Parse
   build-depends:
     base
     , array
+    , split
   default-language: Haskell2010
   ghc-options: -Wall

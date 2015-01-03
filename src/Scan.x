@@ -17,13 +17,13 @@ tokens :-
 \n { const Newline }
 [\ \t]+ ;
 
-\-? ($digit)+ { \s -> Int (read s) s }
+\-? ($digit)+ { \s -> Int (read s, s) }
 
-\-? ($digit)+ \. ($digit)+ { \s -> Dec (fst $ head $ readSigned readFloat s) s }
-\. ($digit)+ { \s -> Dec (fst $ head $ readSigned readFloat $ '0' : s) s }
+\-? ($digit)+ \. ($digit)+ { \s -> Dec (fst $ head $ readSigned readFloat s, s) }
+\. ($digit)+ { \s -> Dec (fst $ head $ readSigned readFloat $ '0' : s, s) }
 \- \. ($digit)+ { \s -> let
   s' = '-' : '0' : tail s
-  in Dec (fst $ head $ readSigned readFloat s') s
+  in Dec (fst $ head $ readSigned readFloat s', s)
 }
 
 \" ([^ \" \\] | (\\ .))* \" { Str . read }
@@ -53,8 +53,8 @@ tokens :-
 
 data Token
 
-  = Int Integer String
-  | Dec Rational String
+  = Int (Integer, String)
+  | Dec (Rational, String)
   | Str String
   | Newline
 

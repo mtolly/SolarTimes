@@ -1,6 +1,7 @@
 module Main where
 
 import Scan
+import Parse
 
 main :: IO ()
 main = do
