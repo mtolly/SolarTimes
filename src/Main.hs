@@ -9,6 +9,8 @@ import Control.Monad.Trans.State
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
+import Data.List.Split (splitOn)
+import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 
 data Value
   = VLong Int32
@@ -88,6 +90,28 @@ asString v = case v of
   VDouble d -> show d
   VString s -> s
 
+castTo :: Type -> Value -> Value
+castTo TLong v = VLong $ case v of
+  VSingle x -> round x
+  VDouble x -> round x
+  VLong   x -> x
+  VString x -> read x
+castTo TString v = VString $ case v of
+  VSingle x -> show x
+  VDouble x -> show x
+  VLong   x -> show x
+  VString x -> x
+castTo TSingle v = VSingle $ case v of
+  VSingle x -> x
+  VDouble x -> realToFrac x
+  VLong   x -> fromIntegral x
+  VString x -> read x
+castTo TDouble v = VDouble $ case v of
+  VSingle x -> realToFrac x
+  VDouble x -> x
+  VLong   x -> fromIntegral x
+  VString x -> read x
+
 run :: Basic ()
 run = do
   stmts <- gets current
@@ -116,18 +140,52 @@ run = do
           _ -> error $ "Unsupported DIM statement: " ++ show stmt
         Assign var x -> do
           v <- eval x
-          modify $ \st -> st
-            { bindings = (var, Value v) : bindings st
-            }
+          assign (SimpleVar var) v
           run
         Say x -> do
           s <- asString <$> eval x
           liftIO $ putStrLn $ "<< " ++ s ++ " >>"
           run
+        Input prompt vars -> do
+          case prompt of
+            Nothing -> return ()
+            Just expr -> eval expr >>= liftIO . putStr . asString
+          liftIO $ putStr "? "
+          input <- liftIO getLine
+          forM_ (zip vars $ splitOn "," input) $ \(var, str) ->
+            assign var $ VString str
+          run
         _ -> error $ "run: undefined; " ++ show stmt
+
+assign :: Var -> Value -> Basic ()
+assign (SimpleVar sv) val = do
+  sbins <- gets subBindings
+  let sv' = fromMaybe sv $ lookup sv sbins
+  modify $ \st -> st
+    { bindings = (sv', Value $ castTo (snd sv') val) : bindings st
+    }
+assign (FuncArray fun args) val = do
+  bins <- gets bindings
+  let val' = castTo (snd fun) val
+  case lookup fun bins of
+    Nothing -> error "assign: tried to assign to undefined array"
+    Just bin -> case bin of
+      Array xs -> case args of
+        [arg] -> do
+          index <- round . asDouble <$> eval arg
+          case splitAt index xs of
+            (before, _ : after) -> let
+              xs' = before ++ [val'] ++ after
+              in modify $ \st -> st
+                { bindings = (fun, Array xs') : bindings st
+                }
+            (_, []) -> error "assign: tried to assign to too-large array index"
+        _ -> error "assign: tried to assign to array using more than 1 index"
+      _ -> undefined
 
 main :: IO ()
 main = do
+  hSetBuffering stdout NoBuffering
   stmts <- parseFile . scan <$> readFile "SolarTimes52xx.bas"
   let initialState = BasicState
         { program = stmts
