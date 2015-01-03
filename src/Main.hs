@@ -13,6 +13,7 @@ import Data.List.Split (splitOn)
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Data.Bits
 import Text.Printf (printf)
+import Text.Read (readMaybe)
 
 data Value
   = VLong Int32
@@ -59,6 +60,10 @@ initialFuncs =
   , ( ("CLNG", TSingle)
     , Function $ \[arg] ->
       return $ VLong $ round $ asDouble arg
+    )
+  , ( ("VAL", TSingle)
+    , Function $ \[arg] ->
+      return $ VSingle $ realToFrac $ asDouble arg
     )
   , ( ("STR", TString)
     , Function $ \[arg] -> return $ VString $ case arg of
@@ -116,6 +121,12 @@ eval e = case e of
   Subtract x y -> math (-) x y
   Or x y -> bitwise (.|.) x y
   And x y -> bitwise (.&.) x y
+  Compare EQ x y -> do
+    vx <- eval x
+    vy <- eval y
+    return $ case (vx, vy) of
+      (VString sx, VString sy) -> VLong $ if sx == sy then -1 else 0
+      _ -> VLong $ if asDouble vx == asDouble vy then -1 else 0
   Compare ord x y -> do
     vx <- asDouble <$> eval x
     vy <- asDouble <$> eval y
@@ -154,14 +165,18 @@ asDouble v = case v of
   VLong   i -> fromIntegral i
   VSingle f -> realToFrac f
   VDouble d -> d
-  VString s -> read s
+  VString s -> case readMaybe s of
+    Nothing -> error $ "asDouble: couldn't read as double; " ++ show s
+    Just res -> res
 
 asLong :: Value -> Int32
 asLong v = case v of
   VLong   i -> i
   VSingle f -> round f
   VDouble d -> round d
-  VString s -> read s
+  VString s -> case readMaybe s of
+    Nothing -> error $ "asLong: couldn't read as long; " ++ show s
+    Just res -> res
 
 asBool :: Value -> Bool
 asBool = (/= 0) . asDouble
@@ -212,11 +227,8 @@ run = do
           forM_ xs $ \x -> eval x >>= liftIO . putStr . asString
           liftIO $ putChar '\n'
           run
-        LPrint xs -> do
-          liftIO $ putStr "[[ "
-          forM_ xs $ \x -> eval x >>= liftIO . putStr . asString
-          liftIO $ putStr " ]]"
-          liftIO $ putChar '\n'
+        LPrint _ -> do
+          -- TODO
           run
         Color _ _ -> run -- TODO
         Dim var -> case var of
@@ -291,9 +303,12 @@ run = do
           run
         Goto expr -> do
           line <- asLong <$> eval expr
-          modify $ \st -> st
-            { current = dropWhile (not . isLabelFor (fromIntegral line)) $ program st
-            }
+          modify $ \st -> let
+            jumpTo = dropWhile (not . isLabelFor (fromIntegral line)) $ program st
+            in st
+              { current = jumpTo
+              , dataValues = [ x | Data exprs <- jumpTo, x <- exprs ]
+              }
           run
         Return -> do
           modify $ \st -> st
@@ -352,7 +367,7 @@ run = do
             _ -> error $ "run: unrecognized format; " ++ s
           run
         LPrintUsing _ _ -> do
-          liftIO $ putStrLn "[[ TODO ]]"
+          -- TODO
           run
         _ -> error $ "run: undefined; " ++ show stmt
 
