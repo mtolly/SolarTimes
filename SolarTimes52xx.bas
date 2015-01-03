@@ -5,35 +5,35 @@
 
 
 
-1 REM        xxxxxx      xxxxxx    xx              xx      xxxxxxxxx
-2 REM       xxxxxxxx    xxxxxxxx   xx            xx  xx    xxxxxxxxxx
-3 REM      xx      xx  xx      xx  xx            xx  xx    xx      xx
-4 REM      xx      xx  xx      xx  xx           xx    xx   xx      xx
-5 REM      xx          xx      xx  xx           xx    xx   xx      xx
-6 REM       xxxxxxx    xx      xx  xx           xxxxxxxx   xxxxxxxxxx
-7 REM        xxxxxxx   xx      xx  xx           xxxxxxxx   xxxxxxxxx
-8 REM              xx  xx      xx  xx          xx      xx  xx  xx
-9 REM      xx      xx  xx      xx  xx          xx      xx  xx   xx
-10 REM     xx      xx  xx      xx  xx          xx      xx  xx    xx
-11 REM      xxxxxxxx    xxxxxxxx   xxxxxxxxxx  xx      xx  xx     xx
-12 REM       xxxxxx      xxxxxx    xxxxxxxxxx  xx      xx  xx      xx
-13 REM
-14 REM                       xxxxxxxxxx  xx  xx       xx  xxxxxxxxxx    xxxxxx
-15 REM                       xxxxxxxxxx  xx  xxxx   xxxx  xxxxxxxxxx   xxxxxxxx
-16 REM                           xx      xx  xxxx   xxxx  xx          xx      xx
-17 REM                           xx      xx  xx xx xx xx  xx          xx      xx
-18 REM                           xx      xx  xx xx xx xx  xx          xx
-19 REM                           xx      xx  xx  xxx  xx  xxxxxxxxxx   xxxxxxx
-20 REM                           xx      xx  xx  xxx  xx  xxxxxxxxxx    xxxxxxx
-21 REM                           xx      xx  xx   x   xx  xx                  xx
-22 REM                           xx      xx  xx       xx  xx          xx      xx
-23 REM                           xx      xx  xx       xx  xx          xx      xx
-24 REM                           xx      xx  xx       xx  xxxxxxxxxx   xxxxxxxx
-25 REM                           xx      xx  xx       xx  xxxxxxxxxx    xxxxxx
+REM        xxxxxx      xxxxxx    xx              xx      xxxxxxxxx
+REM       xxxxxxxx    xxxxxxxx   xx            xx  xx    xxxxxxxxxx
+REM      xx      xx  xx      xx  xx            xx  xx    xx      xx
+REM      xx      xx  xx      xx  xx           xx    xx   xx      xx
+REM      xx          xx      xx  xx           xx    xx   xx      xx
+REM       xxxxxxx    xx      xx  xx           xxxxxxxx   xxxxxxxxxx
+REM        xxxxxxx   xx      xx  xx           xxxxxxxx   xxxxxxxxx
+REM              xx  xx      xx  xx          xx      xx  xx  xx
+REM      xx      xx  xx      xx  xx          xx      xx  xx   xx
+REM      xx      xx  xx      xx  xx          xx      xx  xx    xx
+REM       xxxxxxxx    xxxxxxxx   xxxxxxxxxx  xx      xx  xx     xx
+REM        xxxxxx      xxxxxx    xxxxxxxxxx  xx      xx  xx      xx
+REM
+REM                        xxxxxxxxxx  xx  xx       xx  xxxxxxxxxx    xxxxxx
+REM                        xxxxxxxxxx  xx  xxxx   xxxx  xxxxxxxxxx   xxxxxxxx
+REM                            xx      xx  xxxx   xxxx  xx          xx      xx
+REM                            xx      xx  xx xx xx xx  xx          xx      xx
+REM                            xx      xx  xx xx xx xx  xx          xx
+REM                            xx      xx  xx  xxx  xx  xxxxxxxxxx   xxxxxxx
+REM                            xx      xx  xx  xxx  xx  xxxxxxxxxx    xxxxxxx
+REM                            xx      xx  xx   x   xx  xx                  xx
+REM                            xx      xx  xx       xx  xx          xx      xx
+REM                            xx      xx  xx       xx  xx          xx      xx
+REM                            xx      xx  xx       xx  xxxxxxxxxx   xxxxxxxx
+REM                            xx      xx  xx       xx  xxxxxxxxxx    xxxxxx
 
 
 
-26 REM  SolarTimes 52xx.bas
+REM  SolarTimes 52xx.bas
 
 
 

@@ -15,5 +15,6 @@ executable amiga-basic
     base
     , array
     , split
+    , transformers >= 0.4.0.0
   default-language: Haskell2010
   ghc-options: -Wall

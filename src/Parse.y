@@ -2,6 +2,11 @@
 module Parse
 ( parseFile
 , parseLine
+, Stmt(..)
+, Expr(..)
+, Var(..)
+, SimpleVar
+, Type(..)
 ) where
 
 import Scan
@@ -66,6 +71,7 @@ import Data.List.Split
 
 Line
   : int Stmts { Label $1 : $2 }
+  | Stmts { $1 }
 
 Stmts
   : { [] }
@@ -79,7 +85,7 @@ Stmt
   | LPRINT USING Expr ';' SemiExprs { LPrintUsing $3 $5 }
   | COLOR int ',' int { Color $2 $4 }
   | DIM Var { Dim $2 }
-  | Var '=' Expr { Assign $1 $3 }
+  | SimpleVar '=' Expr { Assign $1 $3 }
   | SAY Expr { Say $2 }
   | INPUT Expr ';' Vars { Input (Just $2) $4 }
   | INPUT Vars { Input Nothing $2 }
@@ -154,9 +160,7 @@ Var
 SimpleVar
   : ident { ($1, TSingle) }
   | ident '$' { ($1, TString) }
-  -- | ident '!' { ($1, TSingle) }
   | ident '#' { ($1, TDouble) }
-  -- | ident '%' { ($1, TShort) }
   | ident '&' { ($1, TLong) }
 
 Vars
@@ -181,7 +185,7 @@ data Stmt
   | LPrintUsing Expr [Expr]
   | Color Integer Integer
   | Dim Var
-  | Assign Var Expr
+  | Assign SimpleVar Expr
   | Say Expr
   | Input (Maybe Expr) [Var]
   | Call String [Var]
@@ -225,7 +229,6 @@ type SimpleVar = (String, Type)
 data Type
   = TSingle
   | TDouble
-  | TShort
   | TLong
   | TString
   deriving (Eq, Ord, Show, Read, Enum, Bounded)
