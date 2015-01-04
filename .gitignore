@@ -2,3 +2,5 @@
 cabal.sandbox.config
 dist/
 AmigaBasic.pdf
+.DS_Store
+lineprint.txt

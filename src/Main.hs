@@ -10,7 +10,7 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
 import Data.List.Split (splitOn)
-import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
+import qualified System.IO as IO
 import Data.Bits
 import Text.Printf (printf)
 import Text.Read (readMaybe)
@@ -30,6 +30,7 @@ data BasicState = BasicState
   , subBindings :: [(SimpleVar, SimpleVar)]
   , dataValues :: [Expr]
   , loops :: [(SimpleVar, ([Value], [Stmt]))]
+  , linePrint :: IO.Handle
   } deriving (Show)
 
 type Basic = StateT BasicState IO
@@ -66,11 +67,19 @@ initialFuncs =
       return $ VSingle $ realToFrac $ asDouble arg
     )
   , ( ("STR", TString)
-    , Function $ \[arg] -> return $ VString $ case arg of
-      VString s -> s
-      VLong   i -> if i <= 0 then show i else ' ' : show i
-      VSingle f -> if f <= 0 then show f else ' ' : show f
-      VDouble d -> if d <= 0 then show d else ' ' : show d
+    , Function $ \[arg] -> return $ VString $ let
+      showNum n = let
+        prefix = if n < 0 then "" else " "
+        simple = show n
+        fixed = case reverse simple of
+          '0' : '.' : rest -> reverse rest
+          _ -> simple
+        in prefix ++ fixed
+      in case arg of
+        VString s -> s
+        VLong   i -> showNum i
+        VSingle f -> showNum f
+        VDouble d -> showNum d
     )
   , ( ("CHR", TString)
     , Function $ \[arg] -> return $ VString [toEnum $ fromIntegral $ asLong arg]
@@ -227,8 +236,10 @@ run = do
           forM_ xs $ \x -> eval x >>= liftIO . putStr . asString
           liftIO $ putChar '\n'
           run
-        LPrint _ -> do
-          -- TODO
+        LPrint xs -> do
+          h <- gets linePrint
+          forM_ xs $ \x -> eval x >>= liftIO . IO.hPutStr h . asString
+          liftIO $ IO.hPutChar h '\n'
           run
         Color _ _ -> run -- TODO
         Dim var -> case var of
@@ -364,10 +375,25 @@ run = do
             "####.#" -> do
               dbl <- asDouble <$> eval expr
               liftIO $ printf "%6.1f" dbl
-            _ -> error $ "run: unrecognized format; " ++ s
+            _ -> error $ "run: PRINT USING unrecognized format; " ++ s
           run
-        LPrintUsing _ _ -> do
-          -- TODO
+        LPrintUsing format exprs -> do
+          h <- gets linePrint
+          expr <- case exprs of
+            [expr] -> return expr
+            _ -> error $ "run: LPRINT USING given not exactly 1 expression"
+          s <- asString <$> eval format
+          case s of
+            "###.#" -> do
+              dbl <- asDouble <$> eval expr
+              liftIO $ IO.hPutStr h $ printf "%5.1f" dbl
+            " ###.#" -> do
+              dbl <- asDouble <$> eval expr
+              liftIO $ IO.hPutStr h $ printf " %5.1f" dbl
+            "####.#" -> do
+              dbl <- asDouble <$> eval expr
+              liftIO $ IO.hPutStr h $ printf "%6.1f" dbl
+            _ -> error $ "run: LPRINT USING unrecognized format; " ++ s
           run
         _ -> error $ "run: undefined; " ++ show stmt
 
@@ -408,15 +434,17 @@ assign (FuncArray fun args) val = do
 
 main :: IO ()
 main = do
-  hSetBuffering stdout NoBuffering
+  IO.hSetBuffering IO.stdout IO.NoBuffering
   stmts <- parseFile . scan <$> readFile "SolarTimes52xx.bas"
-  let initialState = BasicState
-        { program = stmts
-        , current = stmts
-        , returnTo = error "Tried to return, but not in a subprogram"
-        , bindings = initialFuncs
-        , subBindings = []
-        , dataValues = [ expr | Data exprs <- stmts, expr <- exprs ]
-        , loops = []
-        }
-  evalStateT run initialState
+  IO.withFile "lineprint.txt" IO.WriteMode $ \hnd -> do
+    let initialState = BasicState
+          { program = stmts
+          , current = stmts
+          , returnTo = error "Tried to return, but not in a subprogram"
+          , bindings = initialFuncs
+          , subBindings = []
+          , dataValues = [ expr | Data exprs <- stmts, expr <- exprs ]
+          , loops = []
+          , linePrint = hnd
+          }
+    evalStateT run initialState
