@@ -364,38 +364,23 @@ run = do
         End -> return ()
         Data _ -> run
         PrintUsing format exprs -> do
-          expr <- case exprs of
-            [expr] -> return expr
-            _ -> error $ "run: PRINT USING given not exactly 1 expression"
           s <- asString <$> eval format
-          case s of
-            "###.#" -> do
-              dbl <- asDouble <$> eval expr
-              liftIO $ printf "%5.1f" dbl
-            "####.#" -> do
-              dbl <- asDouble <$> eval expr
-              liftIO $ printf "%6.1f" dbl
-            _ -> error $ "run: PRINT USING unrecognized format; " ++ s
+          vals <- mapM eval exprs
+          liftIO $ putStr $ formatUsing s vals
           run
         LPrintUsing format exprs -> do
-          h <- gets linePrint
-          expr <- case exprs of
-            [expr] -> return expr
-            _ -> error $ "run: LPRINT USING given not exactly 1 expression"
           s <- asString <$> eval format
-          case s of
-            "###.#" -> do
-              dbl <- asDouble <$> eval expr
-              liftIO $ IO.hPutStr h $ printf "%5.1f" dbl
-            " ###.#" -> do
-              dbl <- asDouble <$> eval expr
-              liftIO $ IO.hPutStr h $ printf " %5.1f" dbl
-            "####.#" -> do
-              dbl <- asDouble <$> eval expr
-              liftIO $ IO.hPutStr h $ printf "%6.1f" dbl
-            _ -> error $ "run: LPRINT USING unrecognized format; " ++ s
+          vals <- mapM eval exprs
+          h <- gets linePrint
+          liftIO $ IO.hPutStr h $ formatUsing s vals
           run
-        _ -> error $ "run: undefined; " ++ show stmt
+        Sub _ _ -> run
+
+formatUsing :: String -> [Value] -> String
+formatUsing "###.#"  = concatMap $ printf "%5.1f"  . asDouble
+formatUsing "####.#" = concatMap $ printf "%6.1f"  . asDouble
+formatUsing " ###.#" = concatMap $ printf " %5.1f" . asDouble
+formatUsing f = error $ "formatUsing: unrecognized format string; " ++ show f
 
 isLabel :: Stmt -> Bool
 isLabel (Label _) = True
