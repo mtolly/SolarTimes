@@ -1,4 +1,4 @@
-module Main where
+module Main (main) where
 
 import Scan
 import Parse
@@ -67,19 +67,7 @@ initialFuncs =
       return $ VSingle $ realToFrac $ asDouble arg
     )
   , ( ("STR", TString)
-    , Function $ \[arg] -> return $ VString $ let
-      showNum n = let
-        prefix = if n < 0 then "" else " "
-        simple = show n
-        fixed = case reverse simple of
-          '0' : '.' : rest -> reverse rest
-          _ -> simple
-        in prefix ++ fixed
-      in case arg of
-        VString s -> s
-        VLong   i -> showNum i
-        VSingle f -> showNum f
-        VDouble d -> showNum d
+    , Function $ \[arg] -> return $ VString $ asString arg
     )
   , ( ("CHR", TString)
     , Function $ \[arg] -> return $ VString [toEnum $ fromIntegral $ asLong arg]
@@ -178,6 +166,15 @@ asDouble v = case v of
     Nothing -> error $ "asDouble: couldn't read as double; " ++ show s
     Just res -> res
 
+asSingle :: Value -> Float
+asSingle v = case v of
+  VLong   i -> fromIntegral i
+  VSingle f -> f
+  VDouble d -> realToFrac d
+  VString s -> case readMaybe s of
+    Nothing -> error $ "asSingle: couldn't read as float; " ++ show s
+    Just res -> res
+
 asLong :: Value -> Int32
 asLong v = case v of
   VLong   i -> i
@@ -188,36 +185,27 @@ asLong v = case v of
     Just res -> res
 
 asBool :: Value -> Bool
-asBool = (/= 0) . asDouble
+asBool = (/= 0) . asLong
 
 asString :: Value -> String
 asString v = case v of
-  VLong i -> show i
-  VSingle f -> show f
-  VDouble d -> show d
+  VLong   i -> showNum i
+  VSingle f -> showNum f
+  VDouble d -> showNum d
   VString s -> s
+  where showNum n = let
+          prefix = if n < 0 then "" else " "
+          simple = show n
+          fixed = case reverse simple of
+            '0' : '.' : rest -> reverse rest
+            _ -> simple
+          in prefix ++ fixed
 
 castTo :: Type -> Value -> Value
-castTo TLong v = VLong $ case v of
-  VSingle x -> round x
-  VDouble x -> round x
-  VLong   x -> x
-  VString x -> read x
-castTo TString v = VString $ case v of
-  VSingle x -> show x
-  VDouble x -> show x
-  VLong   x -> show x
-  VString x -> x
-castTo TSingle v = VSingle $ case v of
-  VSingle x -> x
-  VDouble x -> realToFrac x
-  VLong   x -> fromIntegral x
-  VString x -> read x
-castTo TDouble v = VDouble $ case v of
-  VSingle x -> realToFrac x
-  VDouble x -> x
-  VLong   x -> fromIntegral x
-  VString x -> read x
+castTo TLong   v = VLong   $ asLong v
+castTo TString v = VString $ asString v
+castTo TSingle v = VSingle $ asSingle v
+castTo TDouble v = VDouble $ asDouble v
 
 isSubStart :: String -> Stmt -> Bool
 isSubStart s (Sub s' _) = s == s'
