@@ -17,6 +17,8 @@ import Text.Read (readMaybe)
 import qualified System.Console.ANSI as ANSI
 import Control.Exception (finally)
 import System.Environment (getArgs, getProgName)
+import Data.Time (getCurrentTime, formatTime, defaultTimeLocale, iso8601DateFormat)
+import System.FilePath (takeDirectory, (</>))
 
 data Value
   = VLong Int32
@@ -424,7 +426,10 @@ main = do
       basic <- getProgName
       error $ "Usage: " ++ basic ++ " prog.bas"
   stmts <- parseFile . scan <$> readFile prog
-  IO.withFile "lineprint.txt" IO.WriteMode $ \hnd -> do
+  stamp <- formatTime defaultTimeLocale (iso8601DateFormat $ Just "%H.%M.%S")
+    <$> getCurrentTime
+  let lprint = takeDirectory prog </> ("lprint_" ++ stamp ++ ".txt")
+  IO.withFile lprint IO.WriteMode $ \hnd -> do
     let initialState = BasicState
           { program = stmts
           , current = stmts
