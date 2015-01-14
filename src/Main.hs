@@ -14,6 +14,8 @@ import qualified System.IO as IO
 import Data.Bits
 import Text.Printf (printf)
 import Text.Read (readMaybe)
+import qualified System.Console.ANSI as ANSI
+import Control.Exception (finally)
 
 data Value
   = VLong Int32
@@ -229,7 +231,14 @@ run = do
           forM_ xs $ \x -> eval x >>= liftIO . IO.hPutStr h . asString
           liftIO $ IO.hPutChar h '\n'
           run
-        Color _ _ -> run -- TODO
+        Color fg bg -> do
+          let fgc = [ANSI.Blue, ANSI.White, ANSI.Black, ANSI.Magenta] !! fromIntegral fg
+              bgc = [ANSI.Blue, ANSI.White, ANSI.Black, ANSI.Magenta] !! fromIntegral bg
+          liftIO $ ANSI.setSGR
+            [ ANSI.SetColor ANSI.Foreground ANSI.Dull fgc
+            -- , ANSI.SetColor ANSI.Background ANSI.Dull bgc
+            ]
+          run
         Dim var -> case var of
           FuncArray simp [Double len] -> do
             let initVal = case snd simp of
@@ -247,8 +256,8 @@ run = do
           assign (SimpleVar var) v
           run
         Say x -> do
-          s <- asString <$> eval x
-          liftIO $ putStrLn $ "<< " ++ s ++ " >>"
+          -- s <- asString <$> eval x
+          -- liftIO $ putStrLn $ "<< " ++ s ++ " >>"
           run
         Input prompt vars -> do
           case prompt of
@@ -420,4 +429,4 @@ main = do
           , loops = []
           , linePrint = hnd
           }
-    evalStateT run initialState
+    evalStateT run initialState `finally` ANSI.setSGR [ANSI.Reset]
