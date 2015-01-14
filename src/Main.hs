@@ -16,6 +16,7 @@ import Text.Printf (printf)
 import Text.Read (readMaybe)
 import qualified System.Console.ANSI as ANSI
 import Control.Exception (finally)
+import System.Environment (getArgs, getProgName)
 
 data Value
   = VLong Int32
@@ -232,11 +233,11 @@ run = do
           liftIO $ IO.hPutChar h '\n'
           run
         Color fg bg -> do
-          let fgc = [ANSI.Blue, ANSI.White, ANSI.Black, ANSI.Magenta] !! fromIntegral fg
-              bgc = [ANSI.Blue, ANSI.White, ANSI.Black, ANSI.Magenta] !! fromIntegral bg
+          let fgc = [ANSI.Blue, ANSI.White, ANSI.Black, ANSI.Yellow] !! fromIntegral fg
+              bgc = [ANSI.Blue, ANSI.White, ANSI.Black, ANSI.Yellow] !! fromIntegral bg
           liftIO $ ANSI.setSGR
-            [ ANSI.SetColor ANSI.Foreground ANSI.Dull fgc
-            -- , ANSI.SetColor ANSI.Background ANSI.Dull bgc
+            [ ANSI.SetColor ANSI.Foreground ANSI.Vivid fgc
+            , ANSI.SetColor ANSI.Background ANSI.Dull bgc
             ]
           run
         Dim var -> case var of
@@ -255,7 +256,7 @@ run = do
           v <- eval x
           assign (SimpleVar var) v
           run
-        Say x -> do
+        Say _x -> do
           -- s <- asString <$> eval x
           -- liftIO $ putStrLn $ "<< " ++ s ++ " >>"
           run
@@ -417,7 +418,12 @@ assign (FuncArray fun args) val = do
 main :: IO ()
 main = do
   IO.hSetBuffering IO.stdout IO.NoBuffering
-  stmts <- parseFile . scan <$> readFile "SolarTimes52xx.bas"
+  prog <- getArgs >>= \argv -> case argv of
+    [prog] -> return prog
+    _      -> do
+      basic <- getProgName
+      error $ "Usage: " ++ basic ++ " prog.bas"
+  stmts <- parseFile . scan <$> readFile prog
   IO.withFile "lineprint.txt" IO.WriteMode $ \hnd -> do
     let initialState = BasicState
           { program = stmts
@@ -430,3 +436,6 @@ main = do
           , linePrint = hnd
           }
     evalStateT run initialState `finally` ANSI.setSGR [ANSI.Reset]
+  putStr "Program complete. Press ENTER to continue..."
+  _ <- getLine
+  return ()
