@@ -105,65 +105,65 @@ REM  SolarTimes 52xx.bas
 160 SAY TRANSLATE$("enter the location")
 170 INPUT "ENTER LOCATION (NAME)"; LC$
 180 A$ = TRANSLATE$ (LC$)
-190 SAY TRANSLATE$("the location iz"):SAY(A$)
+190 SAY TRANSLATE$("the location is"):SAY(A$)
 
 195 REM Get the Latitude from the user.
-200 SAY TRANSLATE$("enter the latitood. remember to enter south latitoods with a negativ number.")
+200 SAY TRANSLATE$("enter the latitude. remember to enter south latitudes with a negative number.")
 210 INPUT "ENTER LATITUDE (FORMAT DD.MMM)"; D1
 
 220 CALL BREAKINPUT(D1,latdeg,latmin)
 
 229 REM Check for Latitude input errors.
-230 IF latdeg>90 OR latdeg<-90 THEN SAY TRANSLATE$("that latitood duz not exsist on the earths surface. pleez re-enter the latitood."):GOTO 210
-240 IF latmin>59.9 OR latmin<-59.9 THEN SAY TRANSLATE$("minuts must be less than sixty. pleez re-enter the latitood."):GOTO 210
-241 IF latdeg=90 AND latmin>0 THEN SAY TRANSLATE$("that latitood duz not exsist on the earths surface. pleez re-enter the latitood."):GOTO 210
-242 IF latdeg=-90 and latmin<-0 THEN SAY TRANSLATE$("that latitood duz not exsist on the earths surface. pleez re-enter the latitood."):GOTO 210
+230 IF latdeg>90 OR latdeg<-90 THEN SAY TRANSLATE$("that latitude does not exist on the earth's surface. please reenter the latitude."):GOTO 210
+240 IF latmin>59.9 OR latmin<-59.9 THEN SAY TRANSLATE$("minutes must be less than sixty. please reenter the latitude."):GOTO 210
+241 IF latdeg=90 AND latmin>0 THEN SAY TRANSLATE$("that latitude does not exist on the earth's surface. please reenter the latitude."):GOTO 210
+242 IF latdeg=-90 and latmin<-0 THEN SAY TRANSLATE$("that latitude does not exist on the earth's surface. please reenter the latitude."):GOTO 210
 
 250 BD$=TRANSLATE$(STR$(latdeg))
 260 BM$=TRANSLATE$(STR$(latmin))
 
 270 IF D1>0 AND D1<89.599 THEN
-280    SAY (BD$): SAY TRANSLATE$("da-grees")
-290    SAY (BM$): SAY TRANSLATE$("minuts north latitude.")
+280    SAY (BD$): SAY TRANSLATE$("degrees")
+290    SAY (BM$): SAY TRANSLATE$("minutes north latitude.")
 291 END IF
 300 IF D1<0 AND D1>-89.599 THEN
-310    SAY (BD$): SAY TRANSLATE$("da-grees")
-311    SAY (BM$): SAY TRANSLATE$("minuts south latitude.")
+310    SAY (BD$): SAY TRANSLATE$("degrees")
+311    SAY (BM$): SAY TRANSLATE$("minutes south latitude.")
 312 END IF
 
 313 REM Say special Latitudes.
-314 IF D1=0 THEN SAY TRANSLATE$("latitood iz on the ekwaytor")
-315 IF D1>89.599 THEN SAY TRANSLATE$("latitood iz the north pole. no lonjitood has to be entered."):D2=0:GOTO 360
-316 IF D1<-89.599 THEN SAY TRANSLATE$("latitood iz the south pole. no lonjitood has to be entered."):D2=0:GOTO 360
+314 IF D1=0 THEN SAY TRANSLATE$("latitude is on the equator")
+315 IF D1>89.599 THEN SAY TRANSLATE$("latitude is the north pole. no longitude has to be entered."):D2=0:GOTO 360
+316 IF D1<-89.599 THEN SAY TRANSLATE$("latitude is the south pole. no longitude has to be entered."):D2=0:GOTO 360
 
 317 REM Get the Longitude from the user.
-318 SAY TRANSLATE$("enter the lonjitood. remember to enter east lonjitoods widh a negativ number.")
+318 SAY TRANSLATE$("enter the longitude. remember to enter east longitudes with a negative number.")
 319 INPUT "ENTER LONGITUDE (FORMAT DD.MMM)"; D2
 
 320 CALL BREAKINPUT(D2,longdeg,longmin)
 
 321 REM Check for Longitude input errors.
-322 IF longdeg>180 OR longdeg<-180 THEN SAY TRANSLATE$("that lonjitood duz not exsist on the earths surface. pleez re-enter the lonjitood."):GOTO 319
-323 IF longmin>59.9 OR longmin<-59.9 THEN SAY TRANSLATE$("minuts must be less than sixty. pleez re-enter the longitood."):GOTO 319
-324 IF longdeg=180 AND longmin>0 THEN SAY TRANSLATE$("that lonjitood duz not exsist on the earths surface. pleez re-enter the lonjitood."):GOTO 319
-325 IF longdeg=-180 and longmin<-0 THEN SAY TRANSLATE$("that lonjitood duz not exsist on the earths surface. pleez re-enter the lonjitood."):GOTO 319
+322 IF longdeg>180 OR longdeg<-180 THEN SAY TRANSLATE$("that longitude does not exist on the earth's surface. please reenter the longitude."):GOTO 319
+323 IF longmin>59.9 OR longmin<-59.9 THEN SAY TRANSLATE$("minutes must be less than sixty. please reenter the longitude."):GOTO 319
+324 IF longdeg=180 AND longmin>0 THEN SAY TRANSLATE$("that longitude does not exist on the earth's surface. please reenter the longitude."):GOTO 319
+325 IF longdeg=-180 and longmin<-0 THEN SAY TRANSLATE$("that longitude does not exist on the earth's surface. please reenter the longitude."):GOTO 319
 
 340 BD$=TRANSLATE$(STR$(longdeg))
 341 BM$=TRANSLATE$(STR$(longmin))
 
 342 IF D2>0 AND D2<179.599 THEN
-343    SAY (BD$): SAY TRANSLATE$("da-grees")
-344    SAY (BM$): SAY TRANSLATE$("minuts west lonjitood.")
+343    SAY (BD$): SAY TRANSLATE$("degrees")
+344    SAY (BM$): SAY TRANSLATE$("minutes west longitude.")
 345 END IF
 346 IF D2<0 AND D1>-179.599 THEN
-347    SAY (BD$): SAY TRANSLATE$("da-grees")
-348    SAY (BM$): SAY TRANSLATE$("minuts east lonjitood.")
+347    SAY (BD$): SAY TRANSLATE$("degrees")
+348    SAY (BM$): SAY TRANSLATE$("minutes east longitude.")
 349 END IF
 
 350 REM Say special Longitudes.
-351 IF D2>179.599# THEN SAY TRANSLATE$("lonjitood iz on the intenational date line.")
-352 IF D2<-179.599# THEN SAY TRANSLATE$("lonjitood iz on the intenational date line")
-353 IF D2=0 THEN SAY TRANSLATE$("lonjitood iz on the grenich prime meridian.")
+351 IF D2>179.599# THEN SAY TRANSLATE$("longitude is on the intenational date line.")
+352 IF D2<-179.599# THEN SAY TRANSLATE$("longitude is on the intenational date line")
+353 IF D2=0 THEN SAY TRANSLATE$("longitude is on the greenwich prime meridian.")
 
 360 LPRINT "Solar Times for ";LC$; CHR$(10)
 370 IF D1>0 AND D1<89.599 THEN LPRINT"Latitude -  ";D1;"Deg N
@@ -188,22 +188,22 @@ REM  SolarTimes 52xx.bas
 530 SAY TRANSLATE$("enter the date")
 
 531 INPUT "ENTER MONTH,DAY (MM,DA)"; M,da
-532 IF M>12  OR M<1 THEN SAY TRANSLATE$("there are only twelve months in the year. Pleez re-enter the date."):GOTO 531
+532 IF M>12  OR M<1 THEN SAY TRANSLATE$("there are only twelve months in the year. please reenter the date."):GOTO 531
 
 533 REM - Check for # days in a specific month
-534 IF M=1 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in januaree. pleez-reenter the date."):GOTO 531
-535 IF M=3 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in march. pleez-reenter the date."):GOTO 531
-536 IF M=5 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in may. pleez-reenter the date."):GOTO 531
-537 IF M=7 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in jooly. pleez-reenter the date."):GOTO 531
-538 IF M=8 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in august. pleez-reenter the date."):GOTO 531
-539 IF M=10 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in october. pleez-reenter the date."):GOTO 531
-540 IF M=12 AND da>31 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in december. pleez-reenter the date."):GOTO 531
+534 IF M=1 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in january. please reenter the date."):GOTO 531
+535 IF M=3 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in march. please reenter the date."):GOTO 531
+536 IF M=5 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in may. please reenter the date."):GOTO 531
+537 IF M=7 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in july. please reenter the date."):GOTO 531
+538 IF M=8 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in august. please reenter the date."):GOTO 531
+539 IF M=10 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in october. please reenter the date."):GOTO 531
+540 IF M=12 AND da>31 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in december. please reenter the date."):GOTO 531
 
-541 IF M=4 AND da>30 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in aypril. pleez-reenter the date."):GOTO 531
-542 IF M=6 AND da>30 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in joone. pleez-reenter the date."):GOTO 531
-543 IF M=9 AND da>30 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in september. pleez-reenter the date."):GOTO 531
-544 IF M=11 AND da>30 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in november. pleez-reenter the date."):GOTO 531
-545 IF M=2 AND da>28 OR da<1 THEN SAY TRANSLATE$("there are-ent that many days in februaree in a normal year. remember there are only twenty-eight dayz in februaree except in a leap year when there are twenty-nine dayz. pleez re-enter the date."):GOTO 546
+541 IF M=4 AND da>30 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in april. please reenter the date."):GOTO 531
+542 IF M=6 AND da>30 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in june. please reenter the date."):GOTO 531
+543 IF M=9 AND da>30 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in september. please reenter the date."):GOTO 531
+544 IF M=11 AND da>30 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in november. please reenter the date."):GOTO 531
+545 IF M=2 AND da>28 OR da<1 THEN SAY TRANSLATE$("there aren't that many days in february in a normal year. remember there are only twenty-eight days in february except in a leap year when there are twenty-nine days. please reenter the date."):GOTO 546
 546 IF M=2 AND da>28 OR da<1 THEN INPUT "ENTER MONTH,DAY (MM,DA)";M,da
 547 IF M=2 AND da>29 THEN GOTO 545
 
@@ -221,38 +221,38 @@ REM  SolarTimes 52xx.bas
 
 630 DIM MonthsSay$(12)
 640 FOR MI = 1 TO 12: READ MonthsSay$(MI): NEXT MI
-650 DATA "januaree", "februaree", "march", "aypril", "may", "joone", "juluy"
+650 DATA "january", "feburary", "march", "april", "may", "june", "july"
 660 DATA "august", "september", "october", "november", "december"
 
 670 SAY TRANSLATE$(MonthsSay$(M))
 
 680 DIM DaysSay$(31)
 690 FOR DAYI = 1 TO 31: READ DaysSay$(DAYI): NEXT DAYI
-700 DATA "first", "second", "third", "forth", "fifth", "sixth", "seventh"
-710 DATA "eighth", "nynth", "tenth", "eeleventh", "twelfth", "thirteenth"
-720 DATA "forteenth", "fifteenth", "sicksteenth", "seventeenth", "eight-teenth"
-730 DATA "nynteenth", "twenteeith", "twentee-first", "twentee-second", "twentee-third"
-740 DATA "twentee-forth", "twentee-fifth", "twentee-sixth", "twentee-seventh", "twentee-eighth"
-750 DATA "twentee-nynth", "thirteeeth", "thirtee-first"
+700 DATA "first", "second", "third", "fourth", "fifth", "sixth", "seventh"
+710 DATA "eighth", "ninth", "tenth", "eleventh", "twelfth", "thirteenth"
+720 DATA "forteenth", "fifteenth", "sixteenth", "seventeenth", "eight-teenth"
+730 DATA "nynteenth", "twentieth", "twenty-first", "twenty-second", "twenty-third"
+740 DATA "twenty-fourth", "twenty-fifth", "twenty-sixth", "twenty-seventh", "twenty-eighth"
+750 DATA "twenty-ninth", "thirtieth", "thirty-first"
 
 760 SAY TRANSLATE$(DaysSay$(da))
 
-832 IF M=1 AND da=1 THEN SAY TRANSLATE$("new yearz day")
-833 IF M=2 AND da=2 THEN SAY TRANSLATE$("ground hog day")
-834 IF M=2 AND da=12 THEN SAY TRANSLATE$("aybraham linkonz birthday")
-835 IF M=2 AND da=22 THEN SAY TRANSLATE$("george washingtonz birthday")
-836 IF M=2 AND da=14 THEN SAY TRANSLATE$("valentinez day")
-837 IF M=3 AND da=17 THEN SAY TRANSLATE$("saint patrickz day")
-838 IF M=5 AND da=22 THEN SAY TRANSLATE$("viktoria day in canada")
+832 IF M=1 AND da=1 THEN SAY TRANSLATE$("new year's day")
+833 IF M=2 AND da=2 THEN SAY TRANSLATE$("groundhog day")
+834 IF M=2 AND da=12 THEN SAY TRANSLATE$("abraham lincoln's birthday")
+835 IF M=2 AND da=22 THEN SAY TRANSLATE$("george washington's birthday")
+836 IF M=2 AND da=14 THEN SAY TRANSLATE$("valentine's day")
+837 IF M=3 AND da=17 THEN SAY TRANSLATE$("saint patrick's day")
+838 IF M=5 AND da=22 THEN SAY TRANSLATE$("victoria day in canada")
 839 IF M=5 AND da=30 THEN SAY TRANSLATE$("u s memorial day")
 840 IF M=6 AND da=14 THEN SAY TRANSLATE$("u s flag day")
 841 IF M=7 AND da=1 THEN SAY TRANSLATE$("dominion day in canada")
 842 IF M=7 AND da=4 THEN SAY TRANSLATE$("u s independence day")
-843 IF M=7 AND da=24 THEN SAY TRANSLATE$("happy birthday margee maybeck")
+843 IF M=7 AND da=24 THEN SAY TRANSLATE$("happy birthday margie maybeck")
 844 IF M=10 AND da=12 THEN SAY TRANSLATE$("columbus day")
 845 IF M=10 AND da=31 THEN SAY TRANSLATE$("halloween")
-846 IF M=11 AND da=1 THEN SAY TRANSLATE$("all saintz day")
-847 IF M=11 AND da=11 THEN SAY TRANSLATE$("armistis or veteranz day")
+846 IF M=11 AND da=1 THEN SAY TRANSLATE$("all saints' day")
+847 IF M=11 AND da=11 THEN SAY TRANSLATE$("armistice or veterans' day")
 848 IF M=12 AND da=25 THEN SAY TRANSLATE$("christmas day")
 
 849 COLOR 1,0
@@ -279,9 +279,9 @@ REM  SolarTimes 52xx.bas
 940 LPRINT USING" ###.#";D;
 950 LPRINT" DEGREES"
 
-960 IF D=0 THEN SAY TRANSLATE$("the declination of the sun iz zero da-grees")
-970 IF D>0 THEN SAY TRANSLATE$("the declination of the sun iz"): SAY (H$):SAY TRANSLATE$("da-grees")
-980 IF D<0 THEN SAY TRANSLATE$("the declination of the sun iz mynus"): SAY (H$):SAY TRANSLATE$("da-grees")
+960 IF D=0 THEN SAY TRANSLATE$("the declination of the sun is zero degrees")
+970 IF D>0 THEN SAY TRANSLATE$("the declination of the sun is"): SAY (H$):SAY TRANSLATE$("degrees")
+980 IF D<0 THEN SAY TRANSLATE$("the declination of the sun is minus"): SAY (H$):SAY TRANSLATE$("degrees")
 
 989 REM Report info for Equation of Time
 990 E=.008000001#+.51*COS(PL*x)-3.197*COS(2*PL*x)-.106*COS(3*PL*x)-.15*COS(4*PL*x)-7.317001*SIN(PL*x)-9.471001*SIN(2*PL*x)-.391*SIN(3*PL*x)-.242*SIN(4*PL*x)
@@ -298,14 +298,14 @@ REM  SolarTimes 52xx.bas
 1050 LPRINT USING"###.#";E;
 1060 LPRINT" MINUTES"
 
-1080 IF E>0 THEN SAY TRANSLATE$("the equation of time iz"): SAY (J$): SAY TRANSLATE$("minuts.")
-1090 IF E=0 THEN SAY TRANSLATE$("the equation of time iz zero minuts.")
-1110 IF E<0 THEN SAY TRANSLATE$("the equation of time iz mynus"): SAY (J$): SAY TRANSLATE$("minuts.")
+1080 IF E>0 THEN SAY TRANSLATE$("the equation of time is"): SAY (J$): SAY TRANSLATE$("minutes.")
+1090 IF E=0 THEN SAY TRANSLATE$("the equation of time is zero minutes.")
+1110 IF E<0 THEN SAY TRANSLATE$("the equation of time is minus"): SAY (J$): SAY TRANSLATE$("minutes.")
 
 1111 CL=COS(LA/J): SD=SIN(D/J): CD=COS(D/J): Y=SD/CL
 1120 IF ABS(Y)=>1 THEN PRINT"NO SUNRISE OR SUNSET":
 1130 IF ABS(Y)=>1 THEN LPRINT:
-1140 IF ABS(Y)=>1 THEN SAY TRANSLATE$("there iz no sunrise or sunset at this location on this date.")
+1140 IF ABS(Y)=>1 THEN SAY TRANSLATE$("there is no sunrise or sunset at this location on this date.")
 1150 IF ABS(Y)=>1 THEN LPRINT"NO SUNRISE OR SUNSET":END
 
 1151 REM Report Azimuth of sunrise
@@ -323,7 +323,7 @@ REM  SolarTimes 52xx.bas
 1240 LPRINT"AZIMUTH OF SUNRISE:";
 1250 LPRINT USING"###.#";ABS(Z);
 1260 LPRINT" DEGREES"
-1270 SAY TRANSLATE$("the azimuth of the sun at sunrize iz"):SAY(K$):SAY TRANSLATE$("dagrees")
+1270 SAY TRANSLATE$("the azimuth of the sun at sunrise is"):SAY(K$):SAY TRANSLATE$("degrees")
 
 1280 REM Report Azimuth of sunset
 1290 REM This truncates all but tenths decimal for say function
@@ -338,7 +338,7 @@ REM  SolarTimes 52xx.bas
 1370 LPRINT"AZIMUTH OF SUNSET: ";
 1380 LPRINT USING"####.#";360-ABS(Z);
 1390 LPRINT" DEGREES"
-1400 SAY TRANSLATE$("the azimuth of the sun at sunset iz"):SAY(N$):SAY TRANSLATE$("dagrees")
+1400 SAY TRANSLATE$("the azimuth of the sun at sunset is"):SAY(N$):SAY TRANSLATE$("degrees")
 
 1401 ST=SIN(Z/J)/CD
 1402 IF ABS(ST)>=1 THEN T=6:TT=6:GOTO 1420
@@ -362,8 +362,8 @@ REM  SolarTimes 52xx.bas
 1483 REM Print info to printer
 1484 LPRINT "TIME OF SUNRISE:";T1$;":";T2$;"am LST  ";GM$;"";T2$;" UTC"
 
-1485 SAY TRANSLATE$("the time of sunrise is"):SAY TRANSLATE$(T1$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("ay em.  local standard time which is")
-1486 SAY TRANSLATE$(GM$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("universal co-ordinated tyme")
+1485 SAY TRANSLATE$("the time of sunrise is"):SAY TRANSLATE$(T1$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("a.m. local standard time which is")
+1486 SAY TRANSLATE$(GM$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("universal coordinated time")
 
 1510 T=12-TT:T=T+TD-E/60+.04
 1520 CNT=1
@@ -374,8 +374,8 @@ REM  SolarTimes 52xx.bas
 
      REM Print info to printer
 1533 LPRINT "TIME OF SUNSET: " ;T1$;":";T2$;"pm LST   ";GM$;"";T2$;" UTC"
-1534 SAY TRANSLATE$("the time of sunset is"):SAY TRANSLATE$(T1$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("pee em.   local standard time which is")
-1535 SAY TRANSLATE$(GM$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("universal co-ordinated tyme")
+1534 SAY TRANSLATE$("the time of sunset is"):SAY TRANSLATE$(T1$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("p.m. local standard time which is")
+1535 SAY TRANSLATE$(GM$): SAY TRANSLATE$(T2$): SAY TRANSLATE$("universal coordinated time")
 
 1560 COLOR 1,0
 1570 LPRINT

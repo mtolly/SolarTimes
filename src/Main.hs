@@ -19,6 +19,7 @@ import Control.Exception (finally)
 import System.Environment (getArgs, getProgName)
 import Data.Time (getCurrentTime, formatTime, defaultTimeLocale, iso8601DateFormat)
 import System.FilePath (takeDirectory, (</>))
+import System.Say (say)
 
 data Value
   = VLong Int32
@@ -258,9 +259,9 @@ run = do
           v <- eval x
           assign (SimpleVar var) v
           run
-        Say _x -> do
-          -- s <- asString <$> eval x
-          -- liftIO $ putStrLn $ "<< " ++ s ++ " >>"
+        Say x -> do
+          s <- asString <$> eval x
+          liftIO $ say s
           run
         Input prompt vars -> do
           case prompt of

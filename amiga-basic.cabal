@@ -19,5 +19,6 @@ executable amiga-basic
     , ansi-terminal
     , time >= 1.5
     , filepath
+    , say
   default-language: Haskell2010
   ghc-options: -Wall
